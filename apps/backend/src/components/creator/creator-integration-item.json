@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_creator_creator_integration_items",
+  "info": {
+    "displayName": "Creator Integration Item"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,96 @@
+{
+  "collectionName": "components_about_about_page_benefits",
+  "info": {
+    "displayName": "About Page Benefits"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "info"
+          ]
+        }
+      }
+    },
+    "icon": {
+      "type": "enumeration",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "info"
+          ]
+        }
+      },
+      "enum": [
+        "clock",
+        "handshake",
+        "map-pin",
+        "calendar",
+        "rocket",
+        "zap",
+        "shield-check",
+        "graduation-cap",
+        "paw-print",
+        "flame",
+        "coffee"
+      ]
+    },
+    "type": {
+      "type": "enumeration",
+      "default": "info",
+      "enum": ["info", "cta"]
+    },
+    "ctaButtonLabel": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "cta"
+          ]
+        }
+      }
+    },
+    "ctaButtonLink": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "cta"
+          ]
+        }
+      }
+    },
+    "ctaButtonIcon": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "cta"
+          ]
+        }
+      }
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "nav_items",
+  "info": {
+    "singularName": "nav-item",
+    "pluralName": "nav-items",
+    "displayName": "Nav Item"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "url": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "required": true,
+      "unique": false
+    },
+    "child": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::nav-item.nav-item",
+      "mappedBy": "parent"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::nav-item.nav-item",
+      "inversedBy": "child"
+    },
+    "order": {
+      "type": "integer",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "required": true,
+      "min": 1
+    },
+    "active": {
+      "type": "boolean",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "default": true
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_footer_footer_app_buttons",
+  "info": {
+    "displayName": "Footer App Buttons"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

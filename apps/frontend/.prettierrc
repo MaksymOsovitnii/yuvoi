@@ -1,0 +1,7 @@
+{
+  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-svelte"],
+  "tailwindStylesheet": "./src/lib/css/main.css",
+  "tabWidth": 2,
+  "singleQuote": true
+}
+

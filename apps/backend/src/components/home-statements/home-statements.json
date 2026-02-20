@@ -1,0 +1,24 @@
+{
+  "collectionName": "components_home_statements_home_statements",
+  "info": {
+    "displayName": "Home: Statements"
+  },
+  "options": {},
+  "attributes": {
+    "homeInvestorStatement": {
+      "type": "component",
+      "component": "investor-statement.investor-statement",
+      "repeatable": true,
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "default": "homeStatements",
+      "required": true
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

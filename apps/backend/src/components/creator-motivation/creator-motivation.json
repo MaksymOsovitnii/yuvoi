@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_creator_motivation_creator_motivations",
+  "info": {
+    "displayName": "Creator Motivation"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    },
+    "creatorMotivationItem": {
+      "type": "component",
+      "component": "creator-motivation.creator-motivation-item",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

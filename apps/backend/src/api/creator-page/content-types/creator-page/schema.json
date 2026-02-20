@@ -1,0 +1,77 @@
+{
+  "kind": "singleType",
+  "collectionName": "creator_pages",
+  "info": {
+    "singularName": "creator-page",
+    "pluralName": "creator-pages",
+    "displayName": "Creator Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "creatorMotivation": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "creator-motivation.creator-motivation",
+      "repeatable": false
+    },
+    "creatorIntegration": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "creator.creator-integration",
+      "repeatable": false
+    },
+    "creatorInfoBox": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "creator.creator-info-box",
+      "repeatable": false
+    },
+    "creatorButton": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "creator.creator-button",
+      "repeatable": false
+    },
+    "creatorSubmissionFormItem": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "creator.creator-submission-form",
+      "repeatable": true
+    },
+    "underForm": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

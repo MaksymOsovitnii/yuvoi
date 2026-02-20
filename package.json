@@ -1,0 +1,47 @@
+{
+  "name": "yuvoi-mono",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "build:frontend": "npm run build --workspace=frontend",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "dev:with-docker": "cd apps/backend && docker-compose up -d && cd ../.. && npm run dev",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,svelte}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte}\"",
+    "lint": "turbo run lint",
+    "start:frontend": "npm run start --workspace=frontend",
+    "test": "turbo run test",
+    "prepare": "husky || true"
+  },
+  "dependencies": {
+    "@nestjs/swagger": "^11.2.5",
+    "@strapi/strapi": "5.33.4",
+    "lodash.debounce": "^4.0.8",
+    "luxon": "^3.7.2",
+    "nest": "^0.1.6"
+  },
+  "devDependencies": {
+    "@types/lodash.debounce": "^4.0.9",
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "prettier-plugin-svelte": "^3.2.0",
+    "turbo": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,svelte}": [
+      "prettier --write"
+    ]
+  }
+}

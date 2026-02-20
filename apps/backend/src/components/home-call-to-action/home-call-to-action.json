@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_home_call_to_action_home_call_to_actions",
+  "info": {
+    "displayName": "Home: Call to Action"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "text",
+      "required": true
+    },
+    "appStoreUrl": {
+      "type": "string"
+    },
+    "playMarketUrl": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "default": "homeCallToAction",
+      "required": true,
+      "unique": true
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files"]
+    }
+  },
+  "config": {}
+}

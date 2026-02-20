@@ -1,0 +1,42 @@
+{
+  "collectionName": "components_investor_statement_investor_statements",
+  "info": {
+    "displayName": "Home: Investor Statement"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "role": {
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "text",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "default": "homeInvestorStatement",
+      "required": true
+    },
+    "order": {
+      "type": "integer",
+      "default": 1
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "config": {}
+}

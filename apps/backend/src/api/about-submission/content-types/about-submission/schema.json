@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "about_submissions",
+  "info": {
+    "singularName": "about-submission",
+    "pluralName": "about-submissions",
+    "displayName": "About Submission"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "required": true
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "userLocale": {
+      "type": "string"
+    }
+  }
+}

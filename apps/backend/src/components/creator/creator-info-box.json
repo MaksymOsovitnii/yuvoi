@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_creator_creator_info_boxes",
+  "info": {
+    "displayName": "Creator Info Box"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    }
+  },
+  "config": {}
+}

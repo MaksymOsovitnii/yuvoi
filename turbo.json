@@ -1,0 +1,26 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**", ".svelte-kit/**", "build/**", "!.svelte-kit/cache/**"],
+      "dependsOn": ["^build"],
+      "env": ["PORT", "NODE_ENV"]
+    },
+    "test": {
+      "outputs": ["coverage/**"],
+      "dependsOn": []
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["PORT", "NODE_ENV"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

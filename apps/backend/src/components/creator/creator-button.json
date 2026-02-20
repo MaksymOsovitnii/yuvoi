@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_creator_creator_buttons",
+  "info": {
+    "displayName": "Creator Button"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    },
+    "url": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

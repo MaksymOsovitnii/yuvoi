@@ -1,0 +1,6 @@
+.svelte-kit
+build
+dist
+node_modules
+*.config.js
+src/modules/ui/shadcn

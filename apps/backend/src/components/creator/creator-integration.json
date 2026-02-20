@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_creator_creator_integrations",
+  "info": {
+    "displayName": "Creator Integration"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "text"
+    },
+    "creatorIntegrationItem": {
+      "type": "component",
+      "component": "creator.creator-integration-item",
+      "repeatable": true
+    },
+    "ctaButton": {
+      "type": "component",
+      "component": "button.button",
+      "repeatable": false
+    }
+  },
+  "config": {}
+}

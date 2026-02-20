@@ -1,0 +1,1995 @@
+# AI Agent Development Rules for Yuvoi Frontend Project
+
+## Project Overview
+
+This is a **SvelteKit + TypeScript** project using **Vite** and **TailwindCSS** for the Yuvoi booking application.
+
+### Key Architectural Decisions
+
+- **Modular Architecture**: Feature-based modules organized under `src/modules/` using Functional Isolated Modules (FIM) pattern
+- **Domain-Driven Design**: Each module represents a business domain (auth, etc.)
+- **Error Handling**: All errors caught and handled at the store layer, not in UI components
+- **Monorepo Setup**: Part of a Turborepo monorepo with shared types package
+- **SvelteKit Conventions**: File-based routing with full SSR/CSR support
+
+The app follows SvelteKit's file-based routing conventions with full support for SSR (Server-Side Rendering) and CSR (Client-Side Rendering), while organizing business logic into domain-based modules.
+
+## Core Technologies & Versions
+
+- **SvelteKit** (latest) - Full-stack web framework
+- **Svelte 5+** - Component framework with reactive state
+- **TypeScript 5.5+** - Type safety
+- **Vite** - Build tool and dev server
+- **TailwindCSS 4+** - Utility-first CSS framework
+- **ESLint 9+** - Code linting with flat config
+- **Prettier** - Code formatting
+
+## SvelteKit File-Based Routing Architecture
+
+### Core Routing Structure
+
+SvelteKit uses a file-based routing system where the directory structure defines the routes:
+
+```
+src/
+├── routes/
+│   ├── +layout.svelte          # Root layout (wraps all pages)
+│   ├── +layout.ts              # Root layout loader (shared data)
+│   ├── +layout.server.ts       # Root layout server loader (SSR only)
+│   ├── +page.svelte            # Homepage (/)
+│   ├── +page.ts                # Page loader (client + SSR)
+│   ├── +page.server.ts         # Page server loader (SSR only)
+│   ├── +error.svelte           # Error boundary
+│   │
+│   ├── about/
+│   │   ├── +page.svelte        # /about page
+│   │   └── +page.ts            # /about loader
+│   │
+│   ├── blog/
+│   │   ├── +layout.svelte      # Layout for all /blog/* routes
+│   │   ├── +page.svelte        # /blog page
+│   │   ├── [slug]/
+│   │   │   ├── +page.svelte    # /blog/[slug] page
+│   │   │   └── +page.ts        # Dynamic route loader
+│   │
+│   └── api/
+│       └── [...path]/
+│           └── +server.ts      # API endpoint handler
+│
+├── lib/                        # Reusable code ($lib alias)
+│   ├── components/             # Svelte components
+│   ├── stores/                 # Svelte stores (state management)
+│   ├── utils/                  # Utility functions
+│   ├── types/                  # TypeScript types
+│   └── server/                 # Server-only code
+│
+├── app.html                    # Root HTML template
+├── app.d.ts                    # TypeScript definitions
+└── app.css                     # Global styles
+```
+
+### SvelteKit File Naming Conventions
+
+| File Name | Purpose | Environment | Example |
+|-----------|---------|-------------|---------|
+| `+page.svelte` | Page component | Client + SSR | Route UI |
+| `+page.ts` | Page load function | Client + SSR | Fetch data |
+| `+page.server.ts` | Server-only load | SSR only | Secure data fetching |
+| `+layout.svelte` | Layout component | Client + SSR | Shared UI wrapper |
+| `+layout.ts` | Layout load function | Client + SSR | Shared data |
+| `+layout.server.ts` | Server-only layout load | SSR only | Auth checks |
+| `+error.svelte` | Error boundary | Client + SSR | Error handling |
+| `+server.ts` | API endpoint | Server only | REST/API routes |
+
+### Route Loading Pattern
+
+```typescript
+// +page.ts - Runs on server during SSR AND client during navigation
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ fetch, params, url }) => {
+  const response = await fetch(`/api/data/${params.id}`);
+  const data = await response.json();
+
+  return {
+    data,
+    title: 'Page Title'
+  };
+};
+```
+
+```typescript
+// +page.server.ts - Runs ONLY on server (secure)
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals, params }) => {
+  // Access to server-only resources (DB, env variables, etc.)
+  const user = locals.user;
+  const privateData = await db.query('SELECT * FROM ...');
+
+  return {
+    user,
+    privateData
+  };
+};
+```
+
+### Layout Hierarchy
+
+Layouts nest automatically based on directory structure:
+
+```
+routes/
+├── +layout.svelte              # Root (wraps everything)
+│   ├── dashboard/
+│   │   ├── +layout.svelte      # Dashboard layout (wraps all dashboard pages)
+│   │   ├── +page.svelte        # /dashboard
+│   │   └── settings/
+│   │       └── +page.svelte    # /dashboard/settings
+```
+
+Result: `Root Layout > Dashboard Layout > Settings Page`
+
+## Svelte Component Standards
+
+### Component Structure
+
+Always use this order in `.svelte` files:
+
+1. `<script lang="ts">` block (or `<script context="module">` if needed)
+2. `<template>` (HTML markup, no wrapper needed in Svelte)
+3. `<style>` block (scoped by default)
+
+### Script Block Pattern
+
+```svelte
+<script lang="ts">
+  // 1. Imports (external, then internal, then types)
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import Button from '$lib/components/Button.svelte';
+  import type { PageData } from './$types';
+
+  // 2. Props definition
+  export let data: PageData;
+  export let optional: boolean = false;
+  export let variant: 'primary' | 'secondary' = 'primary';
+
+  // 3. Local state (reactive by default)
+  let loading = false;
+  let items = data.items;
+
+  // 4. Reactive declarations ($: runs when dependencies change)
+  $: filteredItems = items.filter(item => item.active);
+  $: totalCount = items.length;
+
+  // 5. Functions
+  function handleClick() {
+    loading = true;
+    // logic
+  }
+
+  // 6. Lifecycle hooks
+  onMount(() => {
+    console.log('Component mounted');
+    return () => {
+      console.log('Component unmounted');
+    };
+  });
+</script>
+
+<div class="container">
+  <h1>Total: {totalCount}</h1>
+  {#each filteredItems as item (item.id)}
+    <div>{item.name}</div>
+  {/each}
+</div>
+
+<style>
+  .container {
+    /* Scoped styles */
+  }
+</style>
+```
+
+### Template Guidelines (Svelte Syntax)
+
+#### Conditional Rendering
+
+```svelte
+{#if condition}
+  <p>Condition is true</p>
+{:else if otherCondition}
+  <p>Other condition</p>
+{:else}
+  <p>All false</p>
+{/if}
+```
+
+#### Loops
+
+```svelte
+{#each items as item, index (item.id)}
+  <div>{item.name}</div>
+{:else}
+  <p>No items</p>
+{/each}
+```
+
+#### Await Blocks
+
+```svelte
+{#await promise}
+  <p>Loading...</p>
+{:then result}
+  <p>Result: {result}</p>
+{:catch error}
+  <p>Error: {error.message}</p>
+{/await}
+```
+
+#### Event Handling
+
+```svelte
+<button on:click={handleClick}>Click</button>
+<input on:input={(e) => value = e.currentTarget.value} />
+```
+
+#### Class Binding
+
+```svelte
+<div class="base" class:active={isActive} class:disabled>
+  Content
+  </div>
+```
+
+#### Two-Way Binding
+
+```svelte
+<input bind:value={name} />
+<input type="checkbox" bind:checked={agreed} />
+```
+
+### Component Communication
+
+```svelte
+<!-- Parent.svelte -->
+<script lang="ts">
+  import Child from './Child.svelte';
+
+  function handleEvent(event: CustomEvent<string>) {
+    console.log(event.detail);
+  }
+</script>
+
+<Child value="hello" on:custom={handleEvent} />
+
+<!-- Child.svelte -->
+<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
+  export let value: string;
+
+  const dispatch = createEventDispatcher<{
+    custom: string;
+  }>();
+
+  function triggerEvent() {
+    dispatch('custom', 'data');
+  }
+</script>
+```
+
+## File Organization & Structure
+
+### Architecture Philosophy
+
+This project follows a **domain-driven, feature-based modular architecture** where each feature is a **Functional Isolated Module (FIM)**. Each module is self-contained with its own pages, components, store, types, constants, and utilities.
+
+### Architecture Layers
+
+```
+┌─────────────────────────────────────────────────┐
+│         UI Components                           │
+│    (layout, page, component)                    │
+└─────────────────────────────────────────────────┘
+                    ▲ f
+                    │
+┌─────────────────────────────────────────────────┐
+│         State Stores                            │
+│  (business logic, API reqs, state management)   │
+│                                                 │
+│  Note: all Errors are caught at this layer     │
+└─────────────────────────────────────────────────┘
+                    ▲
+        ┌───────────┼───────────┬───────────┐
+        │           │           │           │
+    ┌───────┐  ┌────────┐  ┌────────┐  ┌────────┐
+    │ Types │  │Constants│ │ Types  │  │Constants│
+    │internal│ │(internal)│ │shared/ │  │(internal)│
+    │frontend│ │         │ │package │  │         │
+    └───────┘  └────────┘  └────────┘  └────────┘
+```
+
+### Naming Conventions
+
+- **Components**: PascalCase (e.g., `Button.svelte`, `UserCard.svelte`, `NavigationMenu.svelte`)
+- **Routes**: kebab-case for directories (e.g., `user-settings/`)
+- **Modules**: kebab-case for directories (e.g., `auth/`, `common/`)
+- **Utilities**: camelCase (e.g., `formatDate.ts`, `apiClient.ts`)
+- **Types**: PascalCase for types/interfaces (e.g., `User`, `ApiResponse`)
+- **Stores**: camelCase files in `store/index.ts`
+- **Constants**: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`, `MAX_RETRIES`)
+
+### Directory Structure
+
+```
+src/
+├── lib/                          # Truly global shared stuff
+│   ├── assets/                   # Global assets
+│   │   ├── css/                  # Global stylesheets
+│   │   ├── images/               # Global images
+│   │   └── fonts/                # Global fonts
+│   └── ...                       # Other truly global utilities
+│
+├── modules/                      # Feature-based modules (domain-driven)
+│   │
+│   ├── auth/                     # Auth module (example FIM)
+│   │   ├── pages/                # Auth-specific pages
+│   │   │   └── LoginPage.svelte
+│   │   ├── components/           # Auth-specific components
+│   │   │   ├── LoginForm.svelte
+│   │   │   └── AuthButton.svelte
+│   │   ├── store/                # Auth state management
+│   │   │   └── index.ts          # Auth store with business logic
+│   │   ├── types/                # Auth-specific types
+│   │   │   └── index.ts
+│   │   ├── consts/               # Auth-specific constants
+│   │   │   ├── index.ts
+│   │   │   └── enums.ts
+│   │   └── utils/                # Auth-specific utilities
+│   │       ├── index.ts
+│   │       └── validators.ts
+│   │
+│   ├── shuttle-booking/          # Shuttle booking module (example FIM)
+│   │   ├── pages/
+│   │   │   ├── BookingListPage.svelte
+│   │   │   └── BookingDetailPage.svelte
+│   │   ├── components/
+│   │   │   ├── ShuttleCard.svelte
+│   │   │   └── BookingForm.svelte
+│   │   ├── store/
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   ├── consts/
+│   │   │   ├── index.ts
+│   │   │   └── enums.ts
+│   │   └── utils/
+│   │       └── index.ts
+│   │
+│   └── common/                   # Common/shared module
+│       ├── pages/                # Shared pages (e.g., 404, error)
+│       │   └── ErrorPage.svelte
+│       ├── components/           # Shared components across modules
+│       │   ├── Button.svelte
+│       │   ├── Modal.svelte
+│       │   └── Loader.svelte
+│       ├── store/                # Common state (e.g., UI state, theme)
+│       │   └── index.ts
+│       ├── types/                # Common types
+│       │   └── index.ts
+│       ├── consts/               # Common constants
+│       │   ├── index.ts
+│       │   └── enums.ts
+│       └── utils/                # Common utilities
+│           ├── index.ts
+│           └── dateFormat.ts
+│
+├── routes/                       # SvelteKit's file-based routing
+│   ├── +layout.svelte            # Root layout
+│   ├── +layout.ts                # Root layout loader (client + server)
+│   ├── +layout.server.ts         # Root layout loader (SSR only)
+│   ├── +page.svelte              # Homepage (/)
+│   ├── +page.ts                  # Route loader (client + server)
+│   ├── +page.server.ts           # Route loader (SSR only)
+│   ├── +error.svelte             # Error boundary
+│   │
+│   ├── login/
+│   │   └── +page.svelte          # /login route
+│   │
+│   └── shuttles/
+│       ├── +page.svelte          # /shuttles route
+│       └── [id]/
+│           └── +page.svelte      # /shuttles/[id] route
+│
+├── app.css                       # App-wide styles
+├── app.d.ts                      # App-wide TypeScript types
+└── app.html                      # Root HTML page
+```
+
+## Functional Isolated Modules (FIM)
+
+### What is a Functional Isolated Module?
+
+A **Functional Isolated Module** is a self-contained feature domain that includes everything needed for that feature:
+- UI components specific to the feature
+- Page components for routes
+- State management (store)
+- Business logic and API calls
+- Types and interfaces
+- Constants and enums
+- Utility functions
+
+### When to Create a New Module
+
+Create a new module when:
+- Adding a new feature domain (e.g., `auth`, `shuttle-booking`, `payments`)
+- The feature has its own business logic and state
+- The feature is large enough to warrant separation (3+ components)
+
+### Module Structure Template
+
+When creating a new module `feature-name`:
+
+```
+src/modules/feature-name/
+├── pages/              # Pages for this feature's routes
+│   └── FeaturePage.svelte
+├── components/         # Components used only in this feature
+│   └── FeatureComponent.svelte
+├── store/              # State management for this feature
+│   └── index.ts        # Feature store (business logic, API calls)
+├── types/              # Types specific to this feature
+│   └── index.ts
+├── consts/             # Constants specific to this feature
+│   ├── index.ts
+│   └── enums.ts
+└── utils/              # Utilities specific to this feature
+    └── index.ts
+```
+
+### Import Patterns
+
+```typescript
+// Importing from the same module (relative imports)
+import { FeatureComponent } from '../components/FeatureComponent.svelte';
+import { featureStore } from '../store';
+import type { FeatureData } from '../types';
+import { FEATURE_STATUS } from '../consts';
+
+// Importing from common module (absolute imports with $modules alias)
+import { Button } from '$modules/common/components/Button.svelte';
+import { formatDate } from '$modules/common/utils';
+import type { ApiResponse } from '$modules/common/types';
+
+// Importing from global assets (absolute import with $lib alias)
+import logo from '$lib/assets/images/logo.svg';
+import '$lib/assets/css/global.css';
+
+// Importing from shared types package (monorepo)
+import type { User, Shuttle, ShuttleRequest } from '@repo/shared-types';
+
+// Importing SvelteKit generated types
+import type { PageData, PageLoad } from './$types';
+
+// Importing SvelteKit utilities
+import { goto } from '$app/navigation';
+import { page } from '$app/stores';
+import { browser } from '$app/environment';
+```
+
+### Path Aliases Configuration
+
+Ensure your `svelte.config.js` and `tsconfig.json` have these aliases configured:
+
+```javascript
+// svelte.config.js
+export default {
+  kit: {
+    alias: {
+      $lib: 'src/lib',
+      $modules: 'src/modules',
+      $routes: 'src/routes'
+    }
+  }
+};
+```
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"],
+      "$modules": ["./src/modules"],
+      "$modules/*": ["./src/modules/*"],
+      "@repo/shared-types": ["../../packages/shared-types/src"]
+    }
+  }
+}
+```
+
+### The `common` Module
+
+The `common` module is special—it contains code shared across multiple features:
+- **Reusable UI components** (Button, Modal, Input, Card, etc.)
+- **Common utilities** (date formatting, validation, API client)
+- **Shared types** (ApiResponse, PaginatedData, etc.)
+- **UI state** (theme, sidebar open/closed, notifications)
+
+**Rule**: Only put code in `common` if it's used by 2+ other modules. Otherwise, keep it in the feature module.
+
+## State Management with Svelte Stores
+
+### Store Architecture (Error Handling Layer)
+
+**Critical**: All errors must be caught and handled at the **store layer**. This is the error boundary for your application. UI components should never need to handle API errors directly.
+
+### Module Store Pattern
+
+```typescript
+// src/modules/auth/store/index.ts
+import { writable, derived } from 'svelte/store';
+import type { User } from '../types';
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+function createAuthStore() {
+  const { subscribe, set, update } = writable<AuthState>({
+    user: null,
+    loading: false,
+    error: null
+  });
+
+  return {
+    subscribe,
+
+    // Actions with error handling at this layer
+    async login(email: string, password: string) {
+      update(state => ({ ...state, loading: true, error: null }));
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          throw new Error('Invalid credentials');
+        }
+
+        const user = await response.json();
+        update(state => ({ ...state, user, loading: false }));
+
+        return { success: true };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Login failed';
+        update(state => ({ ...state, error: errorMessage, loading: false }));
+
+        // Optionally: show toast notification here
+        console.error('Login error:', errorMessage);
+
+        return { success: false, error: errorMessage };
+      }
+    },
+
+    async logout() {
+      update(state => ({ ...state, loading: true }));
+
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        set({ user: null, loading: false, error: null });
+      } catch (error) {
+        // Even if logout fails, clear local state
+        set({ user: null, loading: false, error: null });
+      }
+    },
+
+    clearError() {
+      update(state => ({ ...state, error: null }));
+    }
+  };
+}
+
+export const authStore = createAuthStore();
+
+// Derived stores for computed state
+export const isAuthenticated = derived(
+  authStore,
+  $auth => !!$auth.user
+);
+
+export const isLoading = derived(
+  authStore,
+  $auth => $auth.loading
+);
+```
+
+### Using Module Stores in Components
+
+```svelte
+<!-- src/modules/auth/pages/LoginPage.svelte -->
+<script lang="ts">
+  import { authStore, isAuthenticated } from '../store';
+  import { Button } from '$modules/common/components/Button.svelte';
+
+  let email = '';
+  let password = '';
+
+  // Auto-subscribe with $ prefix (unsubscribes automatically)
+  $: loading = $authStore.loading;
+  $: error = $authStore.error;
+
+  async function handleLogin() {
+    const result = await authStore.login(email, password);
+
+    if (result.success) {
+      // Navigate to dashboard or home
+      console.log('Login successful');
+    }
+    // Error is already handled in the store layer
+  }
+</script>
+
+<div class="login-page">
+  <h1>Login</h1>
+
+  {#if error}
+    <div class="error-message">{error}</div>
+  {/if}
+
+  <form on:submit|preventDefault={handleLogin}>
+    <input
+      type="email"
+      bind:value={email}
+      placeholder="Email"
+      disabled={loading}
+    />
+    <input
+      type="password"
+      bind:value={password}
+      placeholder="Password"
+      disabled={loading}
+    />
+
+    <Button type="submit" disabled={loading}>
+      {loading ? 'Logging in...' : 'Login'}
+    </Button>
+  </form>
+</div>
+```
+
+### Using Module Pages in Routes
+
+```svelte
+<!-- src/routes/login/+page.svelte -->
+<script lang="ts">
+  import LoginPage from '$modules/auth/pages/LoginPage.svelte';
+</script>
+
+<LoginPage />
+```
+
+This pattern separates:
+- **Routes** (`src/routes/`) - SvelteKit routing structure
+- **Module pages** (`src/modules/*/pages/`) - Actual page implementation with logic
+
+### Derived Stores
+
+```typescript
+import { derived, writable } from 'svelte/store';
+
+export const todos = writable([
+  { id: 1, text: 'Task 1', done: false },
+  { id: 2, text: 'Task 2', done: true }
+]);
+
+export const completedTodos = derived(
+  todos,
+  $todos => $todos.filter(todo => todo.done)
+);
+
+export const todoCount = derived(
+  todos,
+  $todos => $todos.length
+);
+```
+
+### Readable Stores
+
+```typescript
+import { readable } from 'svelte/store';
+
+export const time = readable(new Date(), (set) => {
+  const interval = setInterval(() => {
+    set(new Date());
+  }, 1000);
+
+  return () => clearInterval(interval);
+});
+```
+
+## Data Loading Patterns
+
+### Client + Server Loading (+page.ts)
+
+```typescript
+// src/routes/blog/[slug]/+page.ts
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ fetch, params }) => {
+  const response = await fetch(`/api/blog/${params.slug}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to load blog post');
+  }
+
+  const post = await response.json();
+
+  return {
+    post
+  };
+};
+```
+
+### Server-Only Loading (+page.server.ts)
+
+```typescript
+// src/routes/admin/+page.server.ts
+import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
+
+export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user || !locals.user.isAdmin) {
+    throw redirect(302, '/login');
+  }
+
+  // Access server-only resources
+  const users = await db.users.findMany();
+
+  return {
+    users
+  };
+};
+```
+
+### Form Actions
+
+```typescript
+// src/routes/login/+page.server.ts
+import type { Actions } from './$types';
+import { fail, redirect } from '@sveltejs/kit';
+
+export const actions = {
+  login: async ({ request, cookies }) => {
+    const data = await request.formData();
+    const email = data.get('email');
+    const password = data.get('password');
+
+    if (!email || !password) {
+      return fail(400, { email, missing: true });
+    }
+
+    const user = await authenticateUser(email, password);
+
+    if (!user) {
+      return fail(400, { email, incorrect: true });
+    }
+
+    cookies.set('session', user.sessionId, { path: '/' });
+
+    throw redirect(303, '/dashboard');
+  }
+} satisfies Actions;
+```
+
+```svelte
+<!-- src/routes/login/+page.svelte -->
+<script lang="ts">
+  import type { ActionData } from './$types';
+
+  export let form: ActionData;
+</script>
+
+<form method="POST" action="?/login">
+  <input name="email" value={form?.email ?? ''} />
+  {#if form?.missing}
+    <p>Email and password are required</p>
+  {/if}
+  {#if form?.incorrect}
+    <p>Invalid credentials</p>
+  {/if}
+  <input name="password" type="password" />
+  <button type="submit">Login</button>
+</form>
+```
+
+## API Endpoints (+server.ts)
+
+### Creating API Routes
+
+```typescript
+// src/routes/api/users/+server.ts
+import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
+
+export const GET: RequestHandler = async ({ url }) => {
+  const limit = Number(url.searchParams.get('limit')) || 10;
+
+  const users = await db.users.findMany({ limit });
+
+  return json(users);
+};
+
+export const POST: RequestHandler = async ({ request }) => {
+  const data = await request.json();
+
+  const user = await db.users.create(data);
+
+  return json(user, { status: 201 });
+};
+```
+
+### Dynamic API Routes
+
+```typescript
+// src/routes/api/users/[id]/+server.ts
+import type { RequestHandler } from './$types';
+import { json, error } from '@sveltejs/kit';
+
+export const GET: RequestHandler = async ({ params }) => {
+  const user = await db.users.findById(params.id);
+
+  if (!user) {
+    throw error(404, 'User not found');
+  }
+
+  return json(user);
+};
+
+export const PATCH: RequestHandler = async ({ params, request }) => {
+  const updates = await request.json();
+  const user = await db.users.update(params.id, updates);
+
+  return json(user);
+};
+
+export const DELETE: RequestHandler = async ({ params }) => {
+  await db.users.delete(params.id);
+
+  return new Response(null, { status: 204 });
+};
+```
+
+## TypeScript Standards
+
+### Type Definitions
+
+```typescript
+// $lib/types/models.ts
+
+export type UserRole = 'admin' | 'user' | 'guest';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  createdAt: Date;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  error?: string;
+  meta?: {
+    page: number;
+    total: number;
+  };
+}
+
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+```
+
+### SvelteKit Generated Types
+
+Always use generated types from `./$types`:
+
+```typescript
+import type { PageData, PageLoad } from './$types';
+
+export const load: PageLoad = async ({ fetch }) => {
+  // TypeScript knows the return type
+  return {
+    title: 'Page Title',
+    count: 42
+  };
+};
+```
+
+```svelte
+<script lang="ts">
+  import type { PageData } from './$types';
+
+  export let data: PageData;
+  // TypeScript knows data.title and data.count exist
+</script>
+```
+
+### Type Safety Best Practices
+
+- **Avoid `any`** - use `unknown` when type is truly unknown
+- **Use strict mode** - enable in `tsconfig.json`
+- **Type all function parameters and returns**
+- **Use type guards** for narrowing
+- **Leverage discriminated unions** for complex state
+
+```typescript
+type Result<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+function handleResult<T>(result: Result<T>) {
+  if (result.success) {
+    console.log(result.data); // TypeScript knows data exists
+  } else {
+    console.error(result.error); // TypeScript knows error exists
+  }
+}
+```
+
+## Styling Best Practices
+
+### TailwindCSS Usage
+
+```svelte
+<script lang="ts">
+  export let variant: 'primary' | 'secondary' = 'primary';
+
+  $: buttonClass = variant === 'primary'
+    ? 'bg-blue-500 hover:bg-blue-600'
+    : 'bg-gray-500 hover:bg-gray-600';
+</script>
+
+<button
+  class="px-4 py-2 rounded-lg font-medium transition-colors {buttonClass}"
+  on:click
+>
+  <slot />
+</button>
+```
+
+### Scoped Styles
+
+```svelte
+<style>
+  /* Scoped by default - only affects this component */
+  .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Use :global() for global styles */
+  :global(body) {
+    margin: 0;
+  }
+</style>
+```
+
+### Global Styles
+
+```css
+/* src/app.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600;
+  }
+}
+```
+
+## Navigation & Links
+
+### SvelteKit Navigation
+
+```svelte
+<script lang="ts">
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+
+  $: currentPath = $page.url.pathname;
+
+  function navigateToHome() {
+    goto('/');
+  }
+</script>
+
+<!-- Preferred: Use <a> for internal links (client-side navigation) -->
+<a href="/about">About</a>
+
+<!-- For dynamic navigation -->
+<button on:click={() => goto('/dashboard')}>Go to Dashboard</button>
+
+<!-- Active link styling -->
+<a
+  href="/blog"
+  class:active={currentPath === '/blog'}
+>
+  Blog
+</a>
+```
+
+### Preloading
+
+```svelte
+<!-- Preload on hover -->
+<a href="/about" data-sveltekit-preload-data="hover">About</a>
+
+<!-- Preload on viewport entry -->
+<a href="/blog" data-sveltekit-preload-data="viewport">Blog</a>
+```
+
+## Error Handling
+
+### Error Pages
+
+```svelte
+<!-- src/routes/+error.svelte -->
+<script lang="ts">
+  import { page } from '$app/stores';
+
+  $: error = $page.error;
+  $: status = $page.status;
+</script>
+
+<div class="error-container">
+  <h1>{status}</h1>
+  <p>{error?.message}</p>
+  <a href="/">Go Home</a>
+    </div>
+```
+
+### Throwing Errors
+
+```typescript
+import { error } from '@sveltejs/kit';
+
+export const load: PageLoad = async ({ params }) => {
+  const data = await fetchData(params.id);
+
+  if (!data) {
+    throw error(404, {
+      message: 'Not found'
+    });
+  }
+
+  return { data };
+};
+```
+
+## Hooks (Server-Side Middleware)
+
+### Server Hooks
+
+```typescript
+// src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+
+export const handle: Handle = async ({ event, resolve }) => {
+  // Authentication check
+  const sessionId = event.cookies.get('session');
+
+  if (sessionId) {
+    const user = await getUserFromSession(sessionId);
+    event.locals.user = user;
+  }
+
+  // Continue to the route
+  const response = await resolve(event);
+
+  // Modify response headers if needed
+  response.headers.set('x-custom-header', 'value');
+
+  return response;
+};
+```
+
+### Client Hooks
+
+```typescript
+// src/hooks.client.ts
+import type { HandleClientError } from '@sveltejs/kit';
+
+export const handleError: HandleClientError = ({ error, event }) => {
+  console.error('Client error:', error);
+
+  return {
+    message: 'An error occurred',
+    code: 'UNKNOWN'
+  };
+};
+```
+
+## Environment Variables
+
+### Accessing Environment Variables
+
+```typescript
+// Public variables (exposed to client) - prefix with PUBLIC_
+import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_APP_NAME } from '$env/dynamic/public';
+
+// Private variables (server-only) - no prefix
+import { DATABASE_URL } from '$env/static/private';
+import { SECRET_API_KEY } from '$env/dynamic/private';
+```
+
+### .env File
+
+```bash
+# Public (exposed to browser)
+PUBLIC_API_URL=https://api.example.com
+PUBLIC_APP_NAME=My App
+
+# Private (server-only)
+DATABASE_URL=postgresql://...
+SECRET_API_KEY=secret123
+```
+
+## Code Quality Standards
+
+### Component Best Practices
+
+1. **Keep components small** - under 200 lines ideally
+2. **Single responsibility** - each component does one thing well
+3. **Props over slots** - prefer explicit props for simple cases
+4. **Slots for composition** - use slots for flexible content
+5. **Export event types** - make event contracts clear
+
+### DRY Principle
+
+- Extract repeated markup into components
+- Create utility functions for common logic
+- Use stores for shared state
+- Centralize API calls
+- Reuse TypeScript types
+
+### Naming Consistency
+
+- Be descriptive and clear
+- Use established patterns
+- Follow SvelteKit conventions
+- Maintain consistency across codebase
+
+## Performance Optimization
+
+### Code Splitting
+
+- SvelteKit automatically code-splits routes
+- Use dynamic imports for heavy components:
+
+```svelte
+<script lang="ts">
+  import { onMount } from 'svelte';
+
+  let HeavyComponent;
+
+  onMount(async () => {
+    const module = await import('$lib/components/HeavyComponent.svelte');
+    HeavyComponent = module.default;
+  });
+</script>
+
+{#if HeavyComponent}
+  <svelte:component this={HeavyComponent} />
+{/if}
+```
+
+### Image Optimization
+
+```svelte
+<img
+  src="/images/photo.jpg"
+  alt="Description"
+  loading="lazy"
+  decoding="async"
+  width="800"
+  height="600"
+/>
+```
+
+### Reactive Performance
+
+```svelte
+<script lang="ts">
+  import { onMount, beforeUpdate, afterUpdate } from 'svelte';
+
+  let items = [];
+
+  // Avoid expensive computations on every change
+  $: sorted = items.slice().sort(); // ❌ Runs every time items changes
+
+  // Better: Memoize expensive operations
+  let cachedSorted = [];
+  $: if (items.length !== cachedSorted.length) {
+    cachedSorted = items.slice().sort();
+  }
+</script>
+```
+
+## Testing
+
+### Unit Testing Components
+
+```typescript
+// Button.test.ts
+import { render, fireEvent } from '@testing-library/svelte';
+import Button from './Button.svelte';
+
+test('button click event', async () => {
+  const { getByText } = render(Button, { props: { label: 'Click me' } });
+  const button = getByText('Click me');
+
+  await fireEvent.click(button);
+
+  expect(button).toHaveClass('clicked');
+});
+```
+
+## Accessibility
+
+### A11y Standards
+
+- Use semantic HTML elements
+- Provide alt text for images
+- Ensure keyboard navigation
+- Include ARIA labels when needed
+- Test with screen readers
+
+```svelte
+<button
+  on:click={handleClick}
+  aria-label="Close dialog"
+  aria-pressed={isActive}
+>
+  <span aria-hidden="true">×</span>
+</button>
+
+<nav aria-label="Main navigation">
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+</nav>
+```
+
+## Security Best Practices
+
+### CSRF Protection
+
+SvelteKit includes built-in CSRF protection for form actions.
+
+### XSS Prevention
+
+```svelte
+<!-- Safe: Svelte escapes by default -->
+<p>{userInput}</p>
+
+<!-- Unsafe: Use @html only for trusted content -->
+<div>{@html trustedHtml}</div>
+```
+
+### Authentication
+
+```typescript
+// hooks.server.ts
+export const handle: Handle = async ({ event, resolve }) => {
+  const protectedRoutes = ['/dashboard', '/admin'];
+
+  if (protectedRoutes.some(route => event.url.pathname.startsWith(route))) {
+    if (!event.locals.user) {
+      throw redirect(302, '/login');
+    }
+  }
+
+  return resolve(event);
+};
+```
+
+## Build & Deployment
+
+### Build Configuration
+
+```typescript
+// svelte.config.js
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+const config = {
+  preprocess: vitePreprocess(),
+
+  kit: {
+    adapter: adapter(),
+    alias: {
+      $lib: 'src/lib'
+    }
+  }
+};
+
+export default config;
+```
+
+### Adapters
+
+- `@sveltejs/adapter-auto` - Auto-detect platform
+- `@sveltejs/adapter-node` - Node.js server
+- `@sveltejs/adapter-static` - Static site
+- `@sveltejs/adapter-vercel` - Vercel
+- `@sveltejs/adapter-netlify` - Netlify
+
+## AI Agent Guidelines for Modular Architecture
+
+### When Creating New Features
+
+1. **Identify the domain** - What feature/business domain is this? (e.g., auth, shuttle-booking, payments)
+2. **Check if module exists** - Does this domain already have a module?
+   - If yes: Add to existing module
+   - If no: Create new module following FIM structure
+3. **Determine scope** - Is this feature-specific or shared?
+   - Feature-specific: Put in feature module
+   - Shared (2+ modules): Put in `common`
+   - Global asset: Put in `lib/assets`
+4. **Follow the layers**:
+   - Define types first (`types/index.ts`)
+   - Add constants (`consts/index.ts`)
+   - Build store with error handling (`store/index.ts`)
+   - Create components (`components/`)
+   - Create page components (`pages/`)
+   - Wire up routes (`routes/`)
+
+### When Editing Existing Code
+
+1. **Identify the module** - Which module does this code belong to?
+2. **Read the entire module structure** - Understand how the module is organized
+3. **Match existing patterns** - Follow the patterns already established in that module
+4. **Check dependencies** - Does this module import from other modules (except `common`)?
+5. **Verify error handling** - Are errors caught at the store layer?
+
+### When Adding API Integration
+
+1. **Define shared types** in `@repo/shared-types` for API models
+2. **Import shared types** in the module's `types/index.ts`
+3. **Add API endpoints** to module's `consts/index.ts`
+4. **Implement API calls** in module's `store/index.ts`
+5. **Add try-catch blocks** with proper error handling
+6. **Update state** after successful/failed API calls
+7. **Never handle API errors in UI** - always at store layer
+
+### When Creating Components
+
+1. **Determine component type**:
+   - Feature-specific? → `src/modules/feature/components/`
+   - Shared by 2+ modules? → `src/modules/common/components/`
+2. **Keep components small** - under 300 lines
+3. **Use TypeScript** for all props
+4. **Import from correct paths** - use `$modules` alias for cross-module imports
+5. **Follow Svelte best practices** - reactive declarations, proper event handling
+
+### Decision Making
+
+- **Module placement**: If unsure, start in feature module. Move to `common` only when needed elsewhere.
+- **Error handling**: Always at store layer, never in UI
+- **State management**: Local state → Module store → Common store (in that order of preference)
+- **Code sharing**: Only use `common` if 2+ modules need it
+- **Dependencies**: Never import between feature modules (except `common`)
+
+## Development Workflow
+
+### Local Development
+
+```bash
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run check        # Type-check
+npm run lint         # Lint code
+npm run format       # Format code
+```
+
+### Before Committing
+
+1. Run type-checking: `npm run check`
+2. Run linting: `npm run lint`
+3. Run formatting: `npm run format`
+4. Test the feature manually
+5. Ensure no console errors
+6. Verify module structure is correct
+7. Check that errors are handled at store layer
+
+## Working with Shared Types Package
+
+This project is part of a monorepo with a shared types package (`@repo/shared-types`). Use shared types for data that flows between frontend and backend.
+
+```typescript
+// Using shared types from the monorepo package
+import type { User, ShuttleRequest, RequestStatus } from '@repo/shared-types';
+
+// Module-specific types (frontend only)
+export interface LoginFormData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
+export interface AuthState {
+  user: User | null;  // User comes from shared-types
+  loading: boolean;
+  error: string | null;
+}
+```
+
+### When to Use Shared Types vs Module Types
+
+**Use shared types** (`@repo/shared-types`) for:
+- API request/response models
+- Database entities
+- DTOs shared between frontend and backend
+- Business domain models (User, Shuttle, Request, etc.)
+
+**Use module types** for:
+- UI-specific state
+- Form data structures
+- Component props
+- Frontend-only derived data
+
+## Module Development Workflow
+
+### Creating a New Feature Module
+
+1. **Create module structure**:
+```bash
+mkdir -p src/modules/feature-name/{pages,components,store,types,consts,utils}
+touch src/modules/feature-name/store/index.ts
+touch src/modules/feature-name/types/index.ts
+touch src/modules/feature-name/consts/index.ts
+```
+
+2. **Define types first** (`types/index.ts`):
+```typescript
+import type { SharedType } from '@repo/shared-types';
+
+export interface FeatureState {
+  data: SharedType[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface FeatureFilters {
+  search: string;
+  status: string;
+}
+```
+
+3. **Create constants** (`consts/index.ts`):
+```typescript
+export const FEATURE_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  PENDING: 'pending'
+} as const;
+
+export const API_ENDPOINTS = {
+  LIST: '/api/feature',
+  DETAIL: (id: string) => `/api/feature/${id}`
+} as const;
+```
+
+4. **Build the store** (`store/index.ts`):
+```typescript
+import { writable } from 'svelte/store';
+import type { FeatureState } from '../types';
+import { API_ENDPOINTS } from '../consts';
+
+function createFeatureStore() {
+  const { subscribe, set, update } = writable<FeatureState>({
+    data: [],
+    loading: false,
+    error: null
+  });
+
+  return {
+    subscribe,
+
+    async fetchData() {
+      update(state => ({ ...state, loading: true, error: null }));
+
+      try {
+        const response = await fetch(API_ENDPOINTS.LIST);
+        const data = await response.json();
+        update(state => ({ ...state, data, loading: false }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch';
+        update(state => ({ ...state, error: errorMessage, loading: false }));
+      }
+    }
+  };
+}
+
+export const featureStore = createFeatureStore();
+```
+
+5. **Create components** (`components/FeatureComponent.svelte`)
+6. **Create pages** (`pages/FeaturePage.svelte`)
+7. **Wire up routes** (`src/routes/feature/+page.svelte`)
+
+### Module Communication
+
+Modules should communicate through:
+
+1. **Shared stores** (sparingly):
+```typescript
+// src/modules/common/store/index.ts
+export const notificationStore = writable([]);
+```
+
+2. **URL parameters/query strings**:
+```typescript
+// Navigate with data
+goto(`/feature/detail?id=${id}`);
+```
+
+3. **Shared types package** for data contracts
+
+**Avoid**: Direct imports between feature modules (except `common`). If module A needs data from module B, consider:
+- Moving shared logic to `common`
+- Using parent component to coordinate
+- Fetching data independently in each module
+
+## Real-World Examples for This Project
+
+### Example 1: Shuttle Booking Module
+
+```
+src/modules/shuttle-booking/
+├── pages/
+│   ├── ShuttleListPage.svelte       # Browse available shuttles
+│   ├── ShuttleDetailPage.svelte     # Shuttle details and booking
+│   └── BookingConfirmationPage.svelte
+├── components/
+│   ├── ShuttleCard.svelte           # Display shuttle info
+│   ├── BookingForm.svelte           # Booking form
+│   └── RouteMap.svelte              # Map showing shuttle route
+├── store/
+│   └── index.ts                     # shuttleStore with API calls
+├── types/
+│   └── index.ts                     # ShuttleBookingState, BookingForm
+├── consts/
+│   ├── index.ts                     # API endpoints
+│   └── enums.ts                     # BookingStatus enum
+└── utils/
+    └── index.ts                     # calculatePrice, formatRoute
+```
+
+```typescript
+// src/modules/shuttle-booking/store/index.ts
+import { writable, derived } from 'svelte/store';
+import type { Shuttle, ShuttleRequest } from '@repo/shared-types';
+import type { ShuttleBookingState } from '../types';
+
+function createShuttleBookingStore() {
+  const { subscribe, set, update } = writable<ShuttleBookingState>({
+    shuttles: [],
+    selectedShuttle: null,
+    bookingRequest: null,
+    loading: false,
+    error: null
+  });
+
+  return {
+    subscribe,
+
+    async fetchShuttles() {
+      update(state => ({ ...state, loading: true, error: null }));
+
+      try {
+        const response = await fetch('/api/shuttles');
+        if (!response.ok) throw new Error('Failed to fetch shuttles');
+
+        const shuttles = await response.json();
+        update(state => ({ ...state, shuttles, loading: false }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        update(state => ({ ...state, error: errorMessage, loading: false }));
+      }
+    },
+
+    async bookShuttle(shuttleId: string, passengers: number) {
+      update(state => ({ ...state, loading: true, error: null }));
+
+      try {
+        const response = await fetch('/api/shuttle-requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shuttleId, passengers })
+        });
+
+        if (!response.ok) throw new Error('Booking failed');
+
+        const bookingRequest = await response.json();
+        update(state => ({ ...state, bookingRequest, loading: false }));
+
+        return { success: true, bookingRequest };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Booking failed';
+        update(state => ({ ...state, error: errorMessage, loading: false }));
+
+        return { success: false, error: errorMessage };
+      }
+    }
+  };
+}
+
+export const shuttleBookingStore = createShuttleBookingStore();
+```
+
+### Example 2: Auth Module
+
+```
+src/modules/auth/
+├── pages/
+│   ├── LoginPage.svelte
+│   └── RegisterPage.svelte
+├── components/
+│   ├── LoginForm.svelte
+│   └── PasswordInput.svelte
+├── store/
+│   └── index.ts                     # authStore with login/logout
+├── types/
+│   └── index.ts                     # AuthState, LoginCredentials
+└── consts/
+    └── index.ts                     # AUTH_ENDPOINTS, TOKEN_KEY
+```
+
+### Example 3: Common Module (Shared Code)
+
+```
+src/modules/common/
+├── components/
+│   ├── Button.svelte                # Reusable button component
+│   ├── Modal.svelte                 # Modal wrapper
+│   ├── Input.svelte                 # Form input
+│   ├── Card.svelte                  # Card container
+│   └── Loader.svelte                # Loading spinner
+├── store/
+│   └── index.ts                     # uiStore (theme, notifications)
+├── types/
+│   └── index.ts                     # ApiResponse, PaginatedData
+├── consts/
+│   └── index.ts                     # APP_NAME, API_BASE_URL
+└── utils/
+    ├── index.ts
+    ├── dateFormat.ts                # Date formatting utilities
+    ├── validators.ts                # Validation functions
+    └── apiClient.ts                 # Shared API client
+
+```
+
+### Example Route Implementation
+
+```svelte
+<!-- src/routes/shuttles/+page.svelte -->
+<script lang="ts">
+  import ShuttleListPage from '$modules/shuttle-booking/pages/ShuttleListPage.svelte';
+</script>
+
+<ShuttleListPage />
+```
+
+```svelte
+<!-- src/modules/shuttle-booking/pages/ShuttleListPage.svelte -->
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { shuttleBookingStore } from '../store';
+  import ShuttleCard from '../components/ShuttleCard.svelte';
+  import { Loader } from '$modules/common/components/Loader.svelte';
+
+  $: shuttles = $shuttleBookingStore.shuttles;
+  $: loading = $shuttleBookingStore.loading;
+  $: error = $shuttleBookingStore.error;
+
+  onMount(() => {
+    shuttleBookingStore.fetchShuttles();
+  });
+</script>
+
+<div class="shuttle-list-page">
+  <h1>Available Shuttles</h1>
+
+  {#if loading}
+    <Loader />
+  {:else if error}
+    <div class="error">{error}</div>
+  {:else if shuttles.length === 0}
+    <p>No shuttles available</p>
+  {:else}
+    <div class="shuttle-grid">
+      {#each shuttles as shuttle (shuttle.id)}
+        <ShuttleCard {shuttle} />
+      {/each}
+    </div>
+  {/if}
+</div>
+```
+
+## SvelteKit-Specific Patterns
+
+### Page Options
+
+```typescript
+// +page.ts or +page.server.ts
+export const prerender = true;        // Pre-render at build time
+export const ssr = false;             // Disable SSR (client-only)
+export const csr = true;              // Enable client-side rendering
+export const trailingSlash = 'always'; // URL trailing slash behavior
+```
+
+### Layouts
+
+```svelte
+<!-- +layout.svelte -->
+<script lang="ts">
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+</script>
+
+<div class="app">
+  <Header />
+  <main>
+    <slot />  <!-- Child pages render here -->
+  </main>
+  <Footer />
+</div>
+```
+
+### Breaking Out of Layouts
+
+```typescript
+// +layout@.svelte - Resets to root layout
+// +layout@(group).svelte - Resets to specific group
+```
+
+## Anti-Patterns to Avoid
+
+### ❌ Don't Do These
+
+**Module Organization**:
+- Don't create cross-dependencies between feature modules
+- Don't put feature-specific code in `common` module
+- Don't bypass the modular structure by creating files outside modules
+- Don't create tiny modules for simple features (<3 components)
+- Don't duplicate code between modules (move to `common`)
+
+**State Management**:
+- Don't handle API errors in UI components (handle in store layer)
+- Don't use `onMount` for data fetching (use `load` functions or store actions)
+- Don't create stores outside the module structure
+- Don't mutate props directly
+- Don't use global state when module state suffices
+
+**Code Quality**:
+- Don't ignore TypeScript errors
+- Don't use `any` type
+- Don't create massive components (>300 lines)
+- Don't bypass SvelteKit's routing
+- Don't use `window` without checking `browser` environment
+- Don't put secrets in PUBLIC_ env vars
+- Don't ignore accessibility
+
+**Bad Module Structure**:
+```
+❌ src/modules/auth/LoginPage.svelte        # Wrong: pages should be in pages/
+❌ src/components/AuthButton.svelte         # Wrong: should be in module
+❌ src/stores/authStore.ts                  # Wrong: should be in module
+❌ src/modules/users/store/ordersStore.ts   # Wrong: unrelated domain
+```
+
+### ✅ Do These Instead
+
+**Module Organization**:
+- Create self-contained modules for each feature domain
+- Use `common` module for code shared by 2+ modules
+- Keep related code together in the same module
+- Import from `common` for shared components/utils
+- Follow the Functional Isolated Module pattern
+
+**State Management**:
+- Catch and handle all errors at the store layer
+- Use `load` functions for SSR data fetching
+- Use store actions for business logic and API calls
+- Dispatch events to communicate changes up to parent
+- Use local state first, module stores for module-wide state
+
+**Code Quality**:
+- Fix TypeScript errors properly
+- Use proper types or `unknown`
+- Break down large components into smaller ones
+- Use SvelteKit's built-in navigation
+- Check `import { browser } from '$app/environment'`
+- Use private env vars for secrets
+- Build accessible interfaces from the start
+
+**Good Module Structure**:
+```
+✅ src/modules/auth/pages/LoginPage.svelte
+✅ src/modules/auth/components/AuthButton.svelte
+✅ src/modules/auth/store/index.ts
+✅ src/modules/common/components/Button.svelte
+✅ src/routes/login/+page.svelte  # Uses LoginPage from module
+```
+
+## Summary: Key Takeaways
+
+### Architecture Principles
+
+1. **Follow the Modular Architecture** - organize code into Functional Isolated Modules under `src/modules/`
+2. **Domain-Driven Design** - each module represents a business domain/feature
+3. **Error Handling at Store Layer** - all API errors caught and handled in stores, not UI
+4. **Separation of Concerns** - routes for routing, modules for logic, common for shared code
+
+### Development Principles
+
+5. **Follow SvelteKit conventions** - file-based routing, load functions, form actions
+6. **Use TypeScript** - leverage generated types from `./$types` and shared-types package
+7. **Embrace reactivity** - use `$:` for reactive declarations
+8. **Manage state properly** - local state first, module stores for feature state
+9. **Load data correctly** - use `+page.ts` for universal, `+page.server.ts` for secure
+10. **Keep components small** - focused, reusable, and composable (< 300 lines)
+
+### Code Quality
+
+11. **Use TailwindCSS** - utility-first styling with scoped CSS when needed
+12. **Handle errors gracefully** - catch at store layer, show user-friendly messages
+13. **Optimize performance** - leverage SvelteKit's built-in optimizations
+14. **Write accessible code** - semantic HTML, ARIA labels, keyboard navigation
+15. **DRY principle** - move shared code to `common`, keep feature code in modules
+
+### Module Guidelines
+
+- **One module per feature domain** (e.g., auth, shuttle-booking, payments)
+- **Self-contained modules** with pages, components, store, types, consts, utils
+- **No cross-module dependencies** (except `common`)
+- **Common module** for code shared by 2+ modules
+- **Shared-types package** for API contracts and backend data models
+
+---
+
+This project values **modularity**, **domain isolation**, **maintainability**, and **scalability**. The modular architecture keeps features independent and code organized. When making changes:
+
+- Think about which module the code belongs to
+- Handle errors at the store layer
+- Keep modules self-contained
+- Use `common` for truly shared code
+- Consider SSR implications and TypeScript safety
+
+## Quick Reference
+
+### Module Structure Checklist
+
+When creating a new module `my-feature`:
+
+```bash
+src/modules/my-feature/
+├── pages/              ✓ Page components (used by routes)
+├── components/         ✓ Feature-specific components
+├── store/
+│   └── index.ts        ✓ State + business logic + API calls + error handling
+├── types/
+│   └── index.ts        ✓ Frontend-specific types
+├── consts/
+│   ├── index.ts        ✓ Constants
+│   └── enums.ts        ✓ Enums
+└── utils/
+    └── index.ts        ✓ Feature-specific utilities
+```
+
+### Import Path Quick Reference
+
+```typescript
+// Same module (relative)
+import { Component } from '../components/Component.svelte';
+import { featureStore } from '../store';
+
+// Common module (absolute)
+import { Button } from '$modules/common/components/Button.svelte';
+import { formatDate } from '$modules/common/utils';
+
+// Global assets (absolute)
+import logo from '$lib/assets/images/logo.svg';
+
+// Shared types (monorepo)
+import type { User } from '@repo/shared-types';
+
+// SvelteKit
+import { goto } from '$app/navigation';
+import type { PageData } from './$types';
+```
+
+### Store Pattern Quick Reference
+
+```typescript
+// Always follow this pattern in store/index.ts
+import { writable } from 'svelte/store';
+
+function createFeatureStore() {
+  const { subscribe, update } = writable(initialState);
+
+  return {
+    subscribe,
+
+    async action() {
+      update(state => ({ ...state, loading: true, error: null }));
+
+      try {
+        const data = await fetch('/api/endpoint');
+        update(state => ({ ...state, data, loading: false }));
+        return { success: true };
+      } catch (error) {
+        // ✓ Error handled HERE, not in UI
+        update(state => ({
+          ...state,
+          error: error.message,
+          loading: false
+        }));
+        return { success: false, error: error.message };
+      }
+    }
+  };
+}
+
+export const featureStore = createFeatureStore();
+```
+
+### Route → Module Page Pattern
+
+```svelte
+<!-- src/routes/my-feature/+page.svelte -->
+<script lang="ts">
+  import MyFeaturePage from '$modules/my-feature/pages/MyFeaturePage.svelte';
+</script>
+
+<MyFeaturePage />
+```
+
+### Common Commands
+
+```bash
+# Development
+npm run dev              # Start dev server
+npm run check            # Type check
+npm run lint             # Lint code
+npm run format           # Format code
+
+# Module creation helper
+mkdir -p src/modules/new-feature/{pages,components,store,types,consts,utils}
+touch src/modules/new-feature/store/index.ts
+touch src/modules/new-feature/types/index.ts
+touch src/modules/new-feature/consts/index.ts
+```

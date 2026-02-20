@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://yuvoi-8bt22.ondigitalocean.app/sitemap.xml
+Host: https://yuvoi-8bt22.ondigitalocean.app

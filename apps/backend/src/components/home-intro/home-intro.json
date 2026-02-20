@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_home_intro_home_intros",
+  "info": {
+    "displayName": "Home: Intro"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "text",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "default": "homeIntro",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  },
+  "config": {}
+}

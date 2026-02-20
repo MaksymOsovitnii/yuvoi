@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_creator_creator_submission_forms",
+  "info": {
+    "displayName": "Creator Submission Form"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["input", "select"]
+    },
+    "required": {
+      "type": "boolean"
+    },
+    "options": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer",
+      "min": 1
+    },
+    "fieldId": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "placeholder": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

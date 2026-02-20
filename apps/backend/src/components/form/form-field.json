@@ -1,0 +1,47 @@
+{
+  "collectionName": "components_form_form_fields",
+  "info": {
+    "displayName": "Form Field"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "required": true,
+      "enum": ["input", "textarea", "select"]
+    },
+    "required": {
+      "type": "boolean"
+    },
+    "options": {
+      "type": "text",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "type"
+            },
+            "select"
+          ]
+        }
+      }
+    },
+    "order": {
+      "type": "integer",
+      "min": 1
+    },
+    "fieldId": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "placeholder": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

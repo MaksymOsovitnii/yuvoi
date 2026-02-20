@@ -1,0 +1,27 @@
+{
+  "kind": "singleType",
+  "collectionName": "legal_notice_pages",
+  "info": {
+    "singularName": "legal-notice-page",
+    "pluralName": "legal-notice-pages",
+    "displayName": "Legal Notice Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "content": {
+      "type": "richtext",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}
