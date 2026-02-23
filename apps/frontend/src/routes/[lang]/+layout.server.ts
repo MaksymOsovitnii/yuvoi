@@ -58,11 +58,6 @@ const getNavItemData = (navItem: NavItemData): NavItem => {
 export const load: LayoutServerLoad = async ({ params, url }) => {
   const locale = params.lang || "de";
 
-  if (locale !== "de") {
-    const newPath = url.pathname.replace(/^\/[^\/]+/, "/de");
-    throw redirect(307, newPath + url.search);
-  }
-
   // Query to populate all home page internal blocks
   const query = [
     "populate[becomeCreatorButton]=*",

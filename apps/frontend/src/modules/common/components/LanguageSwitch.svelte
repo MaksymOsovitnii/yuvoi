@@ -17,14 +17,12 @@
   };
 </script>
 
-<!-- TODO: unhide when needed, remove cursor auto and disable in buttons -->
-<div class="opacity-0! cursor-default! flex gap-3 px-4 py-2 cursor-pointer {className || ''}">
+<div class="flex gap-3 px-4 py-2 cursor-pointer {className || ''}">
   <button
     class="
       {$languageStore === UiLanguage.EN ? '' : 'text-dark/40 hover:text-dark/70'}
-      font-semibold text-sm duration-150 cursor-pointer cursor-default!
+      font-semibold text-sm duration-150 cursor-pointer
     "
-    disabled
     onclick={() => changeLang(UiLanguage.EN)}
   >
     ENG
@@ -43,9 +41,8 @@
   <button
     class="
       {$languageStore === UiLanguage.DE ? '' : 'text-dark/40 hover:text-dark/70'}
-      font-semibold text-sm duration-150 cursor-pointer cursor-default!
+      font-semibold text-sm duration-150 cursor-pointer
     "
-    disabled
     onclick={() => changeLang(UiLanguage.DE)}
   >
     GER

@@ -144,12 +144,14 @@
     >
       <div class="flex flex-col items-center h-full">
         {#each navItems as navItem, key (key)}
-          <button class="flex justify-between w-full h-12" onclick={() => toggleMenuItem(navItem)}>
-            <p class="leading-12 {isActive(navItem) ? '!text-primary' : 'text-dark-grey'}">
-              {navItem.title}
-            </p>
-
-            {#if navItem.child.length}
+          {#if navItem.child.length}
+            <button
+              class="flex justify-between w-full h-12"
+              onclick={() => toggleMenuItem(navItem)}
+            >
+              <p class="leading-12 {isActive(navItem) ? '!text-primary' : 'text-dark-grey'}">
+                {navItem.title}
+              </p>
               <div
                 class="flex w-10 h-10 -mr-1 duration-150 {openedItems.includes(navItem.title)
                   ? 'rotate-180'
@@ -157,13 +159,27 @@
               >
                 <Icon icon="lucide:chevron-down" class="h-4 w-4 m-auto" />
               </div>
-            {/if}
-          </button>
+            </button>
+          {:else}
+            <a
+              href={resolve(navItem.url)}
+              class="flex w-full h-12"
+              onclick={() => (isMenuOpened = false)}
+            >
+              <p class="leading-12 {isActive(navItem) ? '!text-primary' : 'text-dark-grey'}">
+                {navItem.title}
+              </p>
+            </a>
+          {/if}
 
           {#if navItem.child.length && openedItems.includes(navItem.title)}
             <div transition:slide class="flex flex-col w-full pl-8 pb-3">
               {#each navItem.child as children, ch_key (ch_key)}
-                <a href={resolve(children.url)} class="leading-10 font-light hover:font-medium">
+                <a
+                  href={resolve(children.url)}
+                  class="leading-10 font-light hover:font-medium"
+                  onclick={() => (isMenuOpened = false)}
+                >
                   {children.title}
                 </a>
               {/each}

@@ -66,19 +66,9 @@
     </button>
   </div>
 
-  <div class="flex items-center justify-center w-full">
-    <img
-      alt="Home hero"
-      src={getImageUrl(config.intro.image)}
-      class="
-       h-[320px] object-cover object-center shadow-sm rounded-3xl z-[-1]
-       md:h-[400px]
-       max-lg:w-full max-lg:opacity-75
-       lg:absolute lg:right-8 lg:rounded-xl lg:max-w-[calc(100%-680px)] lg:aspect-3/3 lg:h-[calc(100%-40px)]
-    "
-    />
+  <div class="flex flex-col items-center w-full">
     <button
-      class="lg:hidden absolute group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
+      class="lg:hidden mb-4 group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
       onclick={() => goto(resolve(config.becomeCreatorButton.url))}
     >
       <p class="pl-5 text-lg text-white">
@@ -92,4 +82,14 @@
       </div>
     </button>
   </div>
+  <img
+    alt="Home hero"
+    src={getImageUrl(config.intro.image)}
+    class="
+      h-[320px] object-cover object-center shadow-sm rounded-3xl z-[-1]
+      md:h-[400px]
+      max-lg:w-full max-lg:opacity-75
+      lg:absolute lg:right-8 lg:rounded-xl lg:max-w-[calc(100%-680px)] lg:aspect-3/3 lg:h-[calc(100%-40px)]
+    "
+  />
 </div>
