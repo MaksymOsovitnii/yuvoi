@@ -50,6 +50,7 @@
         max-xs:flex-col max-xs:!min-h-max
         max-sm:h-[140px] max-sm:max-h-[140px] max-sm:w-full
         max-md:-ml-8 max-md:my-4 max-md:w-[calc(100%+64px)]
+        max-xs:!-ml-4 max-xs:!w-[calc(100%+32px)]
         md:gap-4 md:w-[45%] md:mr-15
       "
     >
