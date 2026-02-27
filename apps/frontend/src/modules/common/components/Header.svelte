@@ -58,14 +58,14 @@
   };
 </script>
 
-<header class="sticky top-0 flex flex-col bg-white/85 shadow-sm shadow-warm-grey/20 z-[100]">
-  <div class="flex items-center justify-between px-5 py-3">
+<header class="sticky top-0 flex flex-col bg-white md:bg-white/90 shadow-sm shadow-warm-grey/20 z-[100]">
+  <div class="flex items-center justify-between px-5 py-2 md:py-3">
     <div class="flex items-center gap-2 mt-[1px] cursor-pointer">
       <a
         href={resolve("/")}
         class="flex items-center gap-2 w-[100px] hover:opacity-80 transition-opacity"
       >
-        <img alt="Logo" src="/icons/yuvoi/logo.png" class="h-10 object-contain object-center" />
+        <img alt="Logo" src="/icons/yuvoi/logo.png" class="h-7 md:h-10 object-contain object-center" />
       </a>
     </div>
 
@@ -113,8 +113,9 @@
                   <a
                     href={resolve(children.url)}
                     class="text-sm text-left leading-8 font-light hover:font-medium"
-                    >{children.title}</a
                   >
+                    {children.title}
+                  </a>
                 {/each}
               </div>
             </div>
@@ -140,7 +141,10 @@
   {#if isMenuOpened}
     <div
       transition:slide
-      class="absolute top-[65px] flex flex-col gap-10 w-full h-[calc(100vh-65px)] p-6 bg-white"
+      class="
+        absolute top-[56px] md:top-[65px] flex flex-col gap-10 w-full
+        h-[calc(var(--vh)*100-56px)] md:h-[calc(var(--vh)*100-65px)] p-6 bg-white
+      "
     >
       <div class="flex flex-col items-center h-full">
         {#each navItems as navItem, key (key)}

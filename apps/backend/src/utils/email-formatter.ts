@@ -17,10 +17,10 @@ export const formatSubmission = (formType: string, data: Record<string, any>) =>
     .join("\n");
 
   return `
-New form submission
+<p>New form submission</p>
 
-Form type: ${formType}
+<p>Form type: <b>${formType}</b></p>
 
-${fields}
+<p>${fields}</p>
   `;
 };

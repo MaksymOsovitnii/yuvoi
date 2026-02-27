@@ -1,10 +1,17 @@
 import nodemailer from "nodemailer";
+import mg from "nodemailer-mailgun-transport";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: +process.env.EMAIL_PORT || 1025,
-  secure: false,
-});
+const from = 'Yuvoi <no-reply@mgx.yuvoi.com>';
+
+const auth = {
+  auth: {
+    api_key: process.env.MAILGUN_API_KEY || '',
+    domain: from
+  }
+}
+const receivers = ['hello@yuvoi.com', 'support@yuvoi.com'];
+
+const transporter = nodemailer.createTransport(mg(auth));
 
 export const sendEmail = async ({
   to,
@@ -12,14 +19,14 @@ export const sendEmail = async ({
   text,
   html,
 }: {
-  to: string;
   subject: string;
+  to?: string | string[];
   text?: string;
   html?: string;
 }) => {
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
-    to,
+    from,
+    to: to || receivers,
     subject,
     text,
     html,

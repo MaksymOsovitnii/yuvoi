@@ -10,7 +10,6 @@ export default {
       const text = formatSubmission(formType, result);
 
       await sendEmail({
-        to: process.env.EMAIL_DESTINATION,
         subject: `New ${formType} submission`,
         text,
       });

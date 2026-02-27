@@ -7,12 +7,11 @@ export default {
       const { result } = event;
 
       const formType = "About";
-      const text = formatSubmission(formType, result);
+      const html = formatSubmission(formType, result);
 
       await sendEmail({
-        to: process.env.EMAIL_DESTINATION,
         subject: `New ${formType} submission`,
-        text,
+        html,
       });
 
       strapi.log.info(`📩 ${formType} form email sent`);

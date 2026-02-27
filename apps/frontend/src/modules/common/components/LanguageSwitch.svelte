@@ -17,7 +17,7 @@
   };
 </script>
 
-<div class="flex gap-3 px-4 py-2 cursor-pointer {className || ''}">
+<div class="flex gap-3 max-md:pl-0 px-4 py-2 cursor-pointer {className || ''}">
   <button
     class="
       {$languageStore === UiLanguage.EN ? '' : 'text-dark/40 hover:text-dark/70'}

@@ -48,7 +48,7 @@
       class="
         flex
         max-xs:flex-col max-xs:!min-h-max
-        max-sm:h-[140px] max-sm:max-h-[140px] max-sm:w-full
+        max-sm:w-full
         max-md:-ml-8 max-md:my-4 max-md:w-[calc(100%+64px)]
         max-xs:!-ml-4 max-xs:!w-[calc(100%+32px)]
         md:gap-4 md:w-[45%] md:mr-15
@@ -58,19 +58,19 @@
         <img
           alt="Action"
           src={images()[0]}
-          class="max-md:max-w-[50%] object-cover md:rounded-lg shadow-sm md:aspect-3/2"
+          class="max-md:w-[50%] max-sm:max-h-[160px] object-cover md:rounded-lg shadow-sm md:aspect-3/2 md:max-h-[240px]"
         />
         <img
           alt="Action"
           src={images()[1]}
-          class="max-md:max-w-[50%] object-cover md:rounded-lg shadow-sm md:aspect-2/3 md:max-h-[240px]"
+          class="max-md:w-[50%] max-sm:max-h-[160px] object-cover md:rounded-lg shadow-sm md:aspect-2/3 md:max-h-[240px]"
         />
       </div>
       <div class="flex flex-1 max-xs:!w-full max-md:w-[50%] md:flex-col md:gap-4 md:pt-8">
         <img
           alt="Action"
           src={images()[2]}
-          class="max-xs:max-h-[140px] max-sm:min-w-[100%] max-md:max-w-[50%] object-cover md:rounded-lg shadow-sm md:aspect-2/3 md:max-h-[240px]"
+          class="max-xs:max-h-[140px] max-sm:min-w-[100%] max-md:w-[50%] max-sm:max-h-[160px] object-cover md:rounded-lg shadow-sm md:aspect-2/3 md:max-h-[240px]"
         />
         <img
           alt="Action"
