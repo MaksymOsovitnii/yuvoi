@@ -13,12 +13,6 @@
       "type": "text",
       "required": true
     },
-    "appStoreUrl": {
-      "type": "string"
-    },
-    "playMarketUrl": {
-      "type": "string"
-    },
     "type": {
       "type": "string",
       "default": "homeCallToAction",
@@ -28,7 +22,25 @@
     "images": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": ["images", "files"]
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "appStoreButton": {
+      "type": "component",
+      "component": "button.button",
+      "repeatable": false
+    },
+    "playStoreButton": {
+      "type": "component",
+      "component": "button.button",
+      "repeatable": false
+    },
+    "ctaButton": {
+      "type": "component",
+      "component": "button.button",
+      "repeatable": false
     }
   },
   "config": {}

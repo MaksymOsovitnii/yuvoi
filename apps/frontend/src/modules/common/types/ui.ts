@@ -31,6 +31,7 @@ export interface FooterItems {
     type: string;
     label: string;
     url: string;
+    disabled: boolean;
   }[];
 }
 
@@ -49,4 +50,5 @@ export interface Button {
   label: string;
   url: string | null;
   isInternal: boolean;
+  disabled: boolean;
 }

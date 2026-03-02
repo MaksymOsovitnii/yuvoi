@@ -1,4 +1,5 @@
 import type { StrapiMedia } from "$modules/common/types/api";
+import type { Button } from "$modules/common";
 
 interface HomePageIntroConfig {
   title: string;
@@ -15,8 +16,9 @@ interface HomePageConfig {
   callToAction: {
     title: string;
     text: string;
-    appStoreUrl: string;
-    playMarketUrl: string;
+    appStoreButton: Button;
+    playStoreButton: Button;
+    ctaButton: Button;
     images: StrapiMedia[];
   };
   statements: {

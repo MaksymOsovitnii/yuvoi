@@ -51,13 +51,13 @@
     </p>
 
     <button
-      class="max-lg:hidden group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
+      class="max-lg:hidden group flex items-center gap-3 min-w-[150px] w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
       onclick={() => goto(resolve(config.becomeCreatorButton.url))}
     >
       <p class="pl-5 text-lg text-white">
         {config.becomeCreatorButton.label}
       </p>
-      <div class="w-10 h-10 mr-3 rounded-full bg-white">
+      <div class="w-10 h-10 mr-3 ml-auto rounded-full bg-white">
         <Icon
           icon="lucide:arrow-right"
           class="mt-2 ml-2 w-6 h-6 text-primary duration-150 group-hover:ml-2.5"

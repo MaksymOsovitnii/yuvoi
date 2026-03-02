@@ -3,7 +3,6 @@ import type { NavItem } from "$modules/common/types/ui";
 import type { IStrapi, StrapiResponse } from "$modules/common/types/api";
 import type { HomePageConfig } from "$modules/home";
 import { api } from "$modules/common";
-import { redirect } from "@sveltejs/kit";
 
 interface NavItemData extends IStrapi {
   title: string;
@@ -55,14 +54,14 @@ const getNavItemData = (navItem: NavItemData): NavItem => {
   };
 };
 
-export const load: LayoutServerLoad = async ({ params, url }) => {
+export const load: LayoutServerLoad = async ({ params }) => {
   const locale = params.lang || "de";
 
   // Query to populate all home page internal blocks
   const query = [
     "populate[becomeCreatorButton]=*",
     "populate[blocks][on][home-intro.home-intro][populate]=image",
-    "populate[blocks][on][home-call-to-action.home-call-to-action][populate]=images",
+    "populate[blocks][on][home-call-to-action.home-call-to-action][populate]=*",
     "populate[blocks][on][home-statements.home-statements][populate][homeInvestorStatement][populate]=avatar",
   ].join("&");
 

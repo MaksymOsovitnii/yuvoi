@@ -33,8 +33,12 @@
     <div class="flex gap-4 {className}">
       {#each items.footerAppButtons as appButton (appButton.type)}
         <button
-          class="{buttonClassName} max-md:flex-1 flex items-center gap-3 px-2 xl:px-3 text-sm xl:text-[15px] py-2 text-white bg-white/10 hover:text-primary/80 rounded-lg cursor-pointer"
-          onclick={() => openLink(appButton.url, false)}
+          class="
+            {buttonClassName} {appButton.disabled ? 'opacity-50 hover:!text-white/80' : ''}
+            max-md:flex-1 flex items-center gap-3 px-2 xl:px-3 text-sm xl:text-[15px] py-2 text-white bg-white/10 hover:text-primary/80 rounded-lg cursor-pointer
+          "
+          title="{appButton.disabled ? 'Coming soon...' : ''}"
+          onclick={() => !appButton.disabled && openLink(appButton.url, false)}
         >
           <span class="w-5 h-5 xl:w-6 xl:h-6">
             {#if appButton.type === "appStore"}

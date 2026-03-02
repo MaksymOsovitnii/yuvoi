@@ -4,6 +4,7 @@
   import type { StrapiMedia } from "$modules/common/types/api";
   import AppStoreIcon from "$lib/assets/icons/AppStoreIcon.svelte";
   import PlayStoreIcon from "$lib/assets/icons/PlayStoreIcon.svelte";
+  import Icon from "@iconify/svelte";
 
   interface Props {
     config: HomePageConfig;
@@ -28,7 +29,11 @@
   const titleParts = $derived((): string[] => {
     const parts = config.callToAction?.title?.split(" ") || [];
 
-    return [parts.slice(0, -1).join(" "), parts.slice(-1)[0]];
+    return [ parts.slice(0, -1).join(" "), parts.slice(-1)[0] ];
+  });
+
+  const buttons = $derived(() => {
+    return [ config.callToAction.appStoreButton, config.callToAction.playStoreButton ].filter(i => !!i);
   });
 
   const openLink = (link: string) => {
@@ -39,7 +44,7 @@
 <div class="relative flex my-[100px] md:my-[120px] h-full">
   <div
     class="
-      absolute left-0 w-full h-[calc(100%+72px)] -mt-[36px] bg-petrol-blue/3 z-[-1]
+      absolute left-0 w-full h-[calc(100%+72px)] -mt-[36px] bg-dark z-[-1]
       md:h-[calc(100%+72px+64px)] md:-mt-[72px]
     "
   ></div>
@@ -81,30 +86,50 @@
     </div>
 
     <div class="flex flex-col md:w-[55%]">
-      <h2 class="mt-4 md:mt-12 mb-6 text-[40px] font-bold leading-[105%] text-shadow-2xs">
+      <h2 class="mt-4 md:mt-12 mb-6 text-[40px] font-bold text-white leading-[105%] text-shadow-2xs">
         {titleParts()[0]}
         <span class="text-primary">{titleParts()[1]}</span>
       </h2>
-      <p class="mb-auto text-dark-grey/70">{config.callToAction.text}</p>
+      <p class="mb-8 text-white/80">{config.callToAction.text}</p>
 
       <div
-        class="flex max-md:flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8 max-sm:flex-col max-md:mt-10 md:mb-3 md:gap-y-2 md: mt-4"
+        class="flex max-md:flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8 max-sm:flex-col md:gap-y-2"
       >
-        <button
-          class="max-md:flex-1 flex items-center gap-3 pl-6 pr-7 text-[15px] py-3 text-dark/90 bg-white shadow-sm shadow-petrol-blue/15 hover:shadow-petrol-blue/25 rounded-xl md:rounded-full cursor-pointer"
-          onclick={() => openLink(config.callToAction.appStoreUrl)}
-        >
-          <span class="w-8 h-8"><AppStoreIcon /></span>
-          App Store
-        </button>
-        <button
-          class="max-md:flex-1 flex items-center gap-3 pl-6 pr-7 text-[15px] py-3 text-dark/90 bg-white shadow-sm shadow-petrol-blue/15 hover:shadow-petrol-blue/25 rounded-xl md:rounded-full cursor-pointer"
-          onclick={() => openLink(config.callToAction.playMarketUrl)}
-        >
-          <span class="w-8 h-8"><PlayStoreIcon /></span>
-          Play Store
-        </button>
+        {#each buttons() as button, key (key)}
+          <button
+            class="
+              flex-1 flex items-center gap-3 pl-4 pr-5 text-[15px] py-3 text-dark/90 bg-white/10 rounded-xl cursor-pointer duration-150 {button.disabled ? 'opacity-50' : ''}
+            "
+            title={button.disabled ? 'Coming soon...' : ''}
+            onclick={() => !button.disabled && openLink(button.url)}
+          >
+            <span class="w-7 h-7">
+              {#if key === 0}
+                <AppStoreIcon />
+                {:else}
+                <PlayStoreIcon />
+              {/if}
+            </span>
+            <span class="mx-auto text-white">{button.label}</span>
+          </button>
+        {/each}
       </div>
+
+      <button
+        class="relative group mt-auto mx-auto max-md:mb-10 -mb-3 flex items-center justify-center gap-4 w-max h-[58px] px-6 duration-150 bg-white/0 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
+        onclick={() => openLink(config.callToAction.ctaButton.url)}
+      >
+        <p class="text-[20px] md:text-[22px] font-semibold text-primary">
+          {config.callToAction.ctaButton.label}
+        </p>
+
+        <Icon
+          icon="lucide:wand-sparkles"
+          class="w-6 h-6 text-primary duration-150"
+        />
+
+        <div class="absolute bottom-0 w-12 h-[2px] mx-auto bg-primary rounded-full duration-200 group-hover:w-full"></div>
+      </button>
     </div>
   </div>
 </div>

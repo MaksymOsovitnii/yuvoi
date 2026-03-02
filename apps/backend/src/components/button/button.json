@@ -16,6 +16,9 @@
     "isInternal": {
       "type": "boolean",
       "default": true
+    },
+    "disabled": {
+      "type": "boolean"
     }
   },
   "config": {}

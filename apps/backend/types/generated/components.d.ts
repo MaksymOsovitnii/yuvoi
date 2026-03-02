@@ -37,6 +37,7 @@ export interface ButtonButton extends Struct.ComponentSchema {
     icon: "cursor";
   };
   attributes: {
+    disabled: Schema.Attribute.Boolean;
     isInternal: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     label: Schema.Attribute.String & Schema.Attribute.Required;
     url: Schema.Attribute.String;
@@ -186,6 +187,7 @@ export interface FooterFooterAppButtons extends Struct.ComponentSchema {
     displayName: "Footer App Buttons";
   };
   attributes: {
+    disabled: Schema.Attribute.Boolean;
     label: Schema.Attribute.String;
     type: Schema.Attribute.String;
     url: Schema.Attribute.String;
@@ -220,9 +222,10 @@ export interface HomeCallToActionHomeCallToAction extends Struct.ComponentSchema
     displayName: "Home: Call to Action";
   };
   attributes: {
-    appStoreUrl: Schema.Attribute.String;
+    appStoreButton: Schema.Attribute.Component<"button.button", false>;
+    ctaButton: Schema.Attribute.Component<"button.button", false>;
     images: Schema.Attribute.Media<"images" | "files", true>;
-    playMarketUrl: Schema.Attribute.String;
+    playStoreButton: Schema.Attribute.Component<"button.button", false>;
     text: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     type: Schema.Attribute.String &
