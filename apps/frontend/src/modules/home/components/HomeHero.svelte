@@ -25,6 +25,10 @@
 
     return result;
   });
+
+  const openLink = (link: string) => {
+    window.open(link, "_blank");
+  };
 </script>
 
 <div
@@ -52,7 +56,7 @@
 
     <button
       class="max-lg:hidden group flex items-center gap-3 min-w-[150px] w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
-      onclick={() => goto(resolve(config.becomeCreatorButton.url))}
+      onclick={() => openLink(config.becomeCreatorButton.url)}
     >
       <p class="pl-5 text-lg text-white">
         {config.becomeCreatorButton.label}
@@ -69,7 +73,7 @@
   <div class="flex flex-col items-center w-full">
     <button
       class="lg:hidden mb-4 group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
-      onclick={() => goto(resolve(config.becomeCreatorButton.url))}
+      onclick={() => openLink(config.becomeCreatorButton.url)}
     >
       <p class="pl-5 text-lg text-white">
         {config.becomeCreatorButton.label}
