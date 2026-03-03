@@ -5,6 +5,8 @@
   import AppStoreIcon from "$lib/assets/icons/AppStoreIcon.svelte";
   import PlayStoreIcon from "$lib/assets/icons/PlayStoreIcon.svelte";
   import Icon from "@iconify/svelte";
+  import { cn } from "$lib/utils";
+  import { Tooltip } from "$modules/ui/shadcn";
 
   interface Props {
     config: HomePageConfig;
@@ -93,42 +95,58 @@
       <p class="mb-8 text-white/80">{config.callToAction.text}</p>
 
       <div
-        class="flex max-md:flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8 max-sm:flex-col md:gap-y-2"
+        class={cn('flex w-full max-sm:flex-col max-md:flex-wrap', 'gap-4 sm:gap-6 md:gap-y-2', 'mb-8 md:mb-12 lg:mb-8')}
       >
         {#each buttons() as button, key (key)}
-          <button
-            class="
-              flex-1 flex items-center gap-3 pl-4 pr-5 text-[15px] py-3 text-dark/90 bg-white/10 rounded-xl cursor-pointer duration-150 {button.disabled ? 'opacity-50' : ''}
-            "
-            title={button.disabled ? 'Coming soon...' : ''}
-            onclick={() => !button.disabled && openLink(button.url)}
-          >
-            <span class="w-7 h-7">
-              {#if key === 0}
-                <AppStoreIcon />
-                {:else}
-                <PlayStoreIcon />
+          <Tooltip.Provider delayDuration={100}>
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <button
+                  class="w-full min-w-[200px] flex items-center gap-3 pl-4 pr-5 text-[15px] py-3 text-dark/90 bg-white/10 rounded-xl cursor-pointer duration-150"
+                  class:opacity-50={button.disabled}
+                  onclick={() => !button.disabled && openLink(button.url)}
+                >
+                  <span class="w-7 h-7">
+                    {#if key === 0}
+                      <AppStoreIcon />
+                      {:else}
+                      <PlayStoreIcon />
+                    {/if}
+                  </span>
+                  <span class="mx-auto text-white">{button.label}</span>
+                </button>
+              </Tooltip.Trigger>
+
+              {#if button.disabled}
+                <Tooltip.Content
+                  align="center"
+                  alignOffset={0}
+                  side="bottom"
+                  sideOffset={0}
+                  class="bg-light-grey text-black rounded-xl opacity-90"
+                  arrowClasses="bg-light-grey"
+                >
+                  Coming soon...
+                </Tooltip.Content>
               {/if}
-            </span>
-            <span class="mx-auto text-white">{button.label}</span>
-          </button>
+            </Tooltip.Root>
+          </Tooltip.Provider>
         {/each}
       </div>
 
       <button
-        class="relative group mt-auto mx-auto max-md:mb-10 -mb-3 flex items-center justify-center gap-4 w-max h-[58px] px-6 duration-150 bg-white/0 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
+        class="-mb-1 max-md:mb-10 mt-auto max-lg:mx-auto lg:ml-auto group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
         onclick={() => openLink(config.callToAction.ctaButton.url)}
       >
-        <p class="text-[20px] md:text-[22px] font-semibold text-primary">
+        <p class="pl-5 text-lg text-white">
           {config.callToAction.ctaButton.label}
         </p>
-
-        <Icon
-          icon="lucide:wand-sparkles"
-          class="w-6 h-6 text-primary duration-150"
-        />
-
-        <div class="absolute bottom-0 w-12 h-[2px] mx-auto bg-primary rounded-full duration-200 group-hover:w-full"></div>
+        <div class="w-10 h-10 mr-3 rounded-full bg-white">
+          <Icon
+            icon="lucide:arrow-right"
+            class="mt-2 ml-2 w-6 h-6 text-primary duration-150 group-hover:ml-2.5"
+          />
+        </div>
       </button>
     </div>
   </div>

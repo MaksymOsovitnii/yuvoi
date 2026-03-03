@@ -6,6 +6,8 @@
   import PlayStoreIcon from "$lib/assets/icons/PlayStoreIcon.svelte";
   import { resolve } from "$app/paths";
   import Icon from "@iconify/svelte";
+  import { Tooltip } from "$modules/ui/shadcn";
+  import { cn } from "$lib/utils";
 
   interface Props {
     items: FooterItems;
@@ -32,23 +34,42 @@
   {#if items.footerAppButtons?.length}
     <div class="flex gap-4 {className}">
       {#each items.footerAppButtons as appButton (appButton.type)}
-        <button
-          class="
-            {buttonClassName} {appButton.disabled ? 'opacity-50 hover:!text-white/80' : ''}
-            max-md:flex-1 flex items-center gap-3 px-2 xl:px-3 text-sm xl:text-[15px] py-2 text-white bg-white/10 hover:text-primary/80 rounded-lg cursor-pointer
-          "
-          title="{appButton.disabled ? 'Coming soon...' : ''}"
-          onclick={() => !appButton.disabled && openLink(appButton.url, false)}
-        >
-          <span class="w-5 h-5 xl:w-6 xl:h-6">
-            {#if appButton.type === "appStore"}
-              <AppStoreIcon />
-            {:else}
-              <PlayStoreIcon />
+        <Tooltip.Provider delayDuration={100}>
+          <Tooltip.Root>
+            <Tooltip.Trigger>
+              <button
+                class={cn(
+                  'max-md:flex-1 flex items-center gap-3 px-2 xl:px-3 text-sm xl:text-[15px] py-2 text-white bg-white/10 hover:text-primary/80 rounded-lg cursor-pointer',
+                  buttonClassName,
+                  appButton.disabled ? 'opacity-50 hover:!text-white/80' : '',
+                )}
+                onclick={() => !appButton.disabled && openLink(appButton.url, false)}
+              >
+                <span class="w-5 h-5 xl:w-6 xl:h-6">
+                  {#if appButton.type === "appStore"}
+                    <AppStoreIcon />
+                  {:else}
+                    <PlayStoreIcon />
+                  {/if}
+                </span>
+                <span class="max-md:inline hidden lg:inline min-w-max mr-1">{appButton.label}</span>
+              </button>
+            </Tooltip.Trigger>
+
+            {#if appButton.disabled}
+              <Tooltip.Content
+                align="center"
+                alignOffset={0}
+                side="bottom"
+                sideOffset={0}
+                class="bg-light-grey text-black rounded-xl opacity-90"
+                arrowClasses="bg-light-grey"
+              >
+                Coming soon...
+              </Tooltip.Content>
             {/if}
-          </span>
-          <span class="max-md:inline hidden lg:inline min-w-max mr-1">{appButton.label}</span>
-        </button>
+          </Tooltip.Root>
+        </Tooltip.Provider>
       {/each}
     </div>
   {/if}

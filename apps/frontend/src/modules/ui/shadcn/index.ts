@@ -32,5 +32,6 @@ export * as Spinner from "./spinner";
 export * as Switch from "./switch";
 export * as Tabs from "./tabs";
 export * as Textarea from "./textarea";
+export * as Tooltip from "./tooltip";
 export * as Toggle from "./toggle";
 export * as FileDrugAndDrop from "./file-drug-and-drop";
