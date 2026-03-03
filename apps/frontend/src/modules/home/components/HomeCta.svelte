@@ -31,11 +31,13 @@
   const titleParts = $derived((): string[] => {
     const parts = config.callToAction?.title?.split(" ") || [];
 
-    return [ parts.slice(0, -1).join(" "), parts.slice(-1)[0] ];
+    return [parts.slice(0, -1).join(" "), parts.slice(-1)[0]];
   });
 
   const buttons = $derived(() => {
-    return [ config.callToAction.appStoreButton, config.callToAction.playStoreButton ].filter(i => !!i);
+    return [config.callToAction.appStoreButton, config.callToAction.playStoreButton].filter(
+      (i) => !!i,
+    );
   });
 
   const openLink = (link: string) => {
@@ -88,14 +90,20 @@
     </div>
 
     <div class="flex flex-col md:w-[55%]">
-      <h2 class="mt-4 md:mt-12 mb-6 text-[40px] font-bold text-white leading-[105%] text-shadow-2xs">
+      <h2
+        class="mt-4 md:mt-12 mb-6 text-[40px] font-bold text-white leading-[105%] text-shadow-2xs"
+      >
         {titleParts()[0]}
         <span class="text-primary">{titleParts()[1]}</span>
       </h2>
       <p class="mb-8 text-white/80">{config.callToAction.text}</p>
 
       <div
-        class={cn('flex w-full max-sm:flex-col max-md:flex-wrap', 'gap-4 sm:gap-6 md:gap-y-2', 'mb-8 md:mb-12 lg:mb-8')}
+        class={cn(
+          "flex w-full max-sm:flex-col max-md:flex-wrap",
+          "gap-4 sm:gap-6 md:gap-y-2",
+          "mb-8 md:mb-12 lg:mb-8",
+        )}
       >
         {#each buttons() as button, key (key)}
           <Tooltip.Provider delayDuration={100}>
@@ -109,7 +117,7 @@
                   <span class="w-7 h-7">
                     {#if key === 0}
                       <AppStoreIcon />
-                      {:else}
+                    {:else}
                       <PlayStoreIcon />
                     {/if}
                   </span>
@@ -135,7 +143,7 @@
       </div>
 
       <button
-        class="-mb-1 max-md:mb-10 mt-auto max-lg:mx-auto lg:ml-auto group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
+        class="-mb-1 max-md:mb-10 mt-auto max-lg:mx-auto group flex items-center gap-3 w-max h-[58px] bg-primary duration-150 rounded-full cursor-pointer hover:shadow-inner hover:shadow-dark/15"
         onclick={() => openLink(config.callToAction.ctaButton.url)}
       >
         <p class="pl-5 text-lg text-white">
